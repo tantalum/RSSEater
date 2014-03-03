@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+import sys
+import feedparser
+import re
+import os.path
+import urllib2
+from dateutil import parser as dateparser
+
+def slugify(title):
+    return re.sub('\W', '-', title)
+
+def usage(progname):
+    print "Usage: %s http://fee.url dest_folder"%(progname)
+    
+def eatitem(item, dest_folder):
+    slug = slugify(item.title)
+    datepublished = dateparser.parse(item.published)
+    datestr = datepublished.strftime("%Y-%m-%d")
+    dest_fname = "%s-%s.html"%(datestr, slug)
+    dest_fname = os.path.join(dest_folder, dest_fname)
+    print "Saving to %s"%(dest_fname)
+    content = urllib2.urlopen(item.link)
+    with open(dest_fname, 'w') as dest:
+        c = content.read()
+        while c:
+            dest.write(c)    
+            c = content.read()
+
+def eatrss(feedurl, dest_folder):
+    d = feedparser.parse(feedurl)
+    feed = d.feed
+    print "Parsing items from %s"%(feed.title)
+    for item in d.entries:
+        eatitem(item, dest_folder)
+
+if __name__ == '__main__':
+    if(len(sys.argv) < 3):
+        usage(sys.argv[0])
+        sys.exit(1)
+    else:
+        eatrss(sys.argv[1], sys.argv[2])
