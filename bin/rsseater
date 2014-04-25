@@ -20,6 +20,7 @@ def eatitem(item, dest_folder):
     dest_fname = "%s-%s.html"%(datestr, slug)
     dest_fname = os.path.join(dest_folder, dest_fname)
     print "Saving to %s"%(dest_fname)
+    req = urllib2.Request(url=item.link, headers={'ContentType':'text/html'})
     content = urllib2.urlopen(item.link)
     with open(dest_fname, 'w') as dest:
         c = content.read()
